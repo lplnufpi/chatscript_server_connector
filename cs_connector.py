@@ -36,7 +36,7 @@ class CSConnection(object):
         tcp.connect((self.ip, self.port))
         tcp.send(msg)
         while True:
-            chunk = tcp.recv(64)
+            chunk = tcp.recv(2048)
             if chunk == b'':
                 break
             msg = chunk.decode("utf-8")
