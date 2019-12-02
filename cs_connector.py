@@ -45,6 +45,11 @@ class CSConnection(object):
 
 
 if __name__ == '__main__':
-    conn = CSConnection('username')
-    msg = conn.send('Hello')
-    print('>>>> {}'.format(msg))
+    conn = CSConnection('username', botname='harry')
+    text = ''
+    while text!='exit':
+        import pdb;pdb.set_trace()
+        text = input('<<< ')
+        if text!='exit':
+            msg = conn.send(text)
+            print('>>> {}'.format(msg))
