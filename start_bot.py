@@ -9,9 +9,16 @@ from telebot import types
 EXECUTE_BOT = True
 bot = telebot.TeleBot("1022666252:AAEgV9pQGZBY2F0ddF9IEQocYVbFI3BCOtU")
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-	bot.reply_to(message,"Bot iniciado com sucesso!")
+def get_markup(rows):
+	if not rows:
+		return None
+
+	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
+	for row in rows:
+		keyboard_row = [types.KeyboardButton(cel) for cel in row]
+		markup.row(*keyboard_row)
+	return markup
+
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
@@ -19,39 +26,32 @@ def echo_all(message):
 	first_name = message.from_user.first_name
 	conn = CSConnection(username)
 
-	msg = conn.send(message.text).replace(username, first_name)
-	# msg = msg.replace(' - ', '\n - ')
-	yes_no_question = re.search(r'.*?, {}, .*?".*?"\?'.format(first_name), msg)
-	options_question = re.search(r'(?P<title>.*?:)(?P<options>.*)', msg)
-	if msg.endswith('REVIEW'):
-		markup = types.ReplyKeyboardMarkup()
-		itembtna = types.KeyboardButton('Sim')
-		itembtnv = types.KeyboardButton('Não')
-		markup.row(itembtna, itembtnv)
-		bot.send_message(
-			message.chat.id, msg[:-7], reply_markup=markup
-		)
-	if yes_no_question:
-		markup = types.ReplyKeyboardMarkup()
-		itembtna = types.KeyboardButton('Sim')
-		itembtnv = types.KeyboardButton('Não')
-		markup.row(itembtna, itembtnv)
-		bot.send_message(message.chat.id, msg, reply_markup=markup)
+	bot_msg = conn.send(message.text.lower()).replace(username, first_name)
+
+	options_question = re.search(r'(?P<title>.*?:)(?P<options>.*)', bot_msg)
+	yes_no_question = re.search(
+		r'.*?, {}, .*?".*?"\?'.format(first_name), bot_msg
+	)
+
+	if 'REVIEW' in bot_msg or yes_no_question:
+
+		buttons = [['Sim', 'Não']]
+		bot_messages = bot_msg.split('REVIEW')
+
 	elif options_question:
-		markup = types.ReplyKeyboardMarkup()
 		options_dict = options_question.groupdict()
-		msg = options_dict['title']
 		options = re.finditer(r'(?=( - .*? -))', options_dict['options'])
 		results = [match.group(1) for match in options]
 
-		for option in results:
-			itembtna = types.KeyboardButton(option[3:-2 ])
-			markup.row(itembtna)
-		bot.send_message(message.chat.id, msg, reply_markup=markup)
+		buttons = [[opt[3:-2 ]] for opt in results]
+		bot_messages = [options_dict['title']]
 	else:
-		bot.reply_to(message, msg)
+		buttons = []
+		bot_messages = [bot_msg]
 
-
+	markup = get_markup(buttons)
+	for bot_msg in bot_messages:
+		bot.send_message(message.chat.id, bot_msg, reply_markup=markup)
 
 
 while(EXECUTE_BOT):
