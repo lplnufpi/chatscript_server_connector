@@ -9,13 +9,16 @@ from telebot import types
 EXECUTE_BOT = True
 bot = telebot.TeleBot("1022666252:AAEgV9pQGZBY2F0ddF9IEQocYVbFI3BCOtU")
 
+def title(text):
+	return text[0].upper() + text[1:]
+
 def get_markup(rows):
 	if not rows:
 		return None
 
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
 	for row in rows:
-		keyboard_row = [types.KeyboardButton(cel) for cel in row]
+		keyboard_row = [types.KeyboardButton(title(cel)) for cel in row]
 		markup.row(*keyboard_row)
 	return markup
 
@@ -44,10 +47,10 @@ def echo_all(message):
 		results = [match.group(1) for match in options]
 
 		buttons = [[opt[3:-2 ]] for opt in results]
-		bot_messages = [options_dict['title']]
+		bot_messages = options_dict['title'].split('BREAK')
 	else:
 		buttons = []
-		bot_messages = [bot_msg]
+		bot_messages = bot_msg.split('BREAK')
 
 	markup = get_markup(buttons)
 	for bot_msg in bot_messages:
