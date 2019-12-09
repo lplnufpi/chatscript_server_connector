@@ -45,9 +45,12 @@ def echo_all(message):
 		options_dict = options_question.groupdict()
 		options = re.finditer(r'(?=( - .*? -))', options_dict['options'])
 		results = [match.group(1) for match in options]
-
-		buttons = [[opt[3:-2 ]] for opt in results]
-		bot_messages = options_dict['title'].split('BREAK')
+		if results:
+			buttons = [[opt[3:-2 ]] for opt in results]
+			bot_messages = options_dict['title'].split('BREAK')
+		else:
+			buttons = []
+			bot_messages = [bot_msg]
 	else:
 		buttons = []
 		bot_messages = bot_msg.split('BREAK')
