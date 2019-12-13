@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import sys
+sys.path.append('../')
+sys.path.append('../tools/enelvo')
+
 import re
+import time
+
+import enelvo.normaliser
+
 from cs_connector import CSConnection
 import telebot
 from telebot import types
@@ -8,9 +16,12 @@ from telebot import types
 
 EXECUTE_BOT = True
 bot = telebot.TeleBot("1022666252:AAEgV9pQGZBY2F0ddF9IEQocYVbFI3BCOtU")
+norm = enelvo.normaliser.Normaliser()
+
 
 def title(text):
 	return text[0].upper() + text[1:]
+
 
 def get_markup(rows):
 	if not rows:
@@ -25,11 +36,16 @@ def get_markup(rows):
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
-	username = str(message.from_user.id)
+	user_id = str(message.from_user.id)
 	first_name = message.from_user.first_name
-	conn = CSConnection(username)
+	user_name = first_name+'_'+user_id
+	conn = CSConnection(user_name)
 
-	bot_msg = conn.send(message.text.lower()).replace(username, first_name)
+	# Spell correction
+	rcvd_msg = norm.normalise(message.text.lower())
+	bot_msg = conn.send(
+		rcvd_msg
+	).replace(first_name.lower(), first_name.title())
 
 	options_question = re.search(r'(?P<title>.*?:)(?P<options>.*)', bot_msg)
 	yes_no_question = re.search(
@@ -56,8 +72,12 @@ def echo_all(message):
 		bot_messages = bot_msg.split('BREAK')
 
 	markup = get_markup(buttons)
-	for bot_msg in bot_messages:
-		bot.send_message(message.chat.id, bot_msg, reply_markup=markup)
+	num_messages = len(bot_messages) - 1
+	for index, bot_msg in enumerate(bot_messages):
+		send_msg = title(bot_msg.strip())
+		send_markup = markup if index == num_messages else None
+		bot.send_message(message.chat.id, send_msg, reply_markup=send_markup)
+		time.sleep(0.3)
 
 
 while(EXECUTE_BOT):
