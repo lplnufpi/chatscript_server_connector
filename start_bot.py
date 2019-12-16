@@ -7,8 +7,8 @@ sys.path.append('../tools/enelvo')
 import re
 import time
 
+from chatscript_generator import wordembedding
 import enelvo.normaliser
-
 from cs_connector import CSConnection
 import telebot
 from telebot import types
@@ -17,6 +17,7 @@ from telebot import types
 EXECUTE_BOT = True
 bot = telebot.TeleBot("1022666252:AAEgV9pQGZBY2F0ddF9IEQocYVbFI3BCOtU")
 norm = enelvo.normaliser.Normaliser()
+cbow = wordembedding.CBoW()
 
 
 def title(text):
@@ -41,8 +42,18 @@ def echo_all(message):
 	user_name = first_name+'_'+user_id
 	conn = CSConnection(user_name)
 
-	# Spell correction
-	rcvd_msg = norm.normalise(message.text.lower())
+	if message.text.startswith(':'):
+		rcvd_msg = message.text.lower()
+	else:
+		words = message.text.lower().split(' ')
+		rcvd_msg = list()
+		for word in words:
+			if word in cbow.model:
+				rcvd_msg.append(word)
+			else:
+				rcvd_msg.append(norm.normalise(word))
+		rcvd_msg = ' '.join(rcvd_msg)
+
 	bot_msg = conn.send(
 		rcvd_msg
 	).replace(first_name.lower(), first_name.title())
