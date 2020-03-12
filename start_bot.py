@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 import sys
 sys.path.append('../')
 sys.path.append('../tools/enelvo')
 
 import re
 import time
+import requests
 
 from chatscript_generator import wordembedding
 import enelvo.normaliser
@@ -22,6 +24,7 @@ cbow = wordembedding.CBoW()
 
 def title(text):
 	return text[0].upper() + text[1:]
+
 
 
 def get_markup(rows):
@@ -92,4 +95,22 @@ def echo_all(message):
 
 
 while(EXECUTE_BOT):
-	bot.polling()
+	try:
+		bot.polling()
+	except requests.exceptions.ConnectionError:
+		print("... Reconnecting network ...")
+		command = (
+			"curl 'https://login.ufpi.br:6082/php/uid.php?vsys=1&rule=0' "
+			"-H 'Host: login.ufpi.br:6082' -H 'User-Agent: Mozilla/5.0 (X11; "
+			"Linux x86_64; rv:60.0) Gecko/20100101 Firefox/60.0' -H 'Accept: "
+			"text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' "
+			"-H 'Accept-Language: en-US,en;q=0.5' --compressed -H "
+			"'Referer: https://login.ufpi.br:6082/php/uid.php?vsys=1&rule=0' "
+			"-H 'Content-Type: application/x-www-form-urlencoded' "
+			"-H 'Cookie: _ga=GA1.2.1028843240.1560291798; "
+			"SESSID=f4MBAV0uER9p8mn1HucNAg==; _gid=GA1.2.2145029827.1563300260' "
+			"-H 'Connection: keep-alive' -H 'Upgrade-Insecure-Requests: 1' "
+			"--data 'buttonClicked=0&err_flag=0&user=jpegx100&passwd=09081995&"
+			"ok=Login'"
+		)
+		os.system(command)
