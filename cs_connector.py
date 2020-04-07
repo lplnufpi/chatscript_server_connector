@@ -4,7 +4,7 @@ import socket
 class CSConnection(object):
     """Class to connect and send messages to ChatScript Server."""
 
-    def __init__(self, user, botname='harry', ip='localhost', port=1024):
+    def __init__(self, user, botname='botin', ip='localhost', port=1024):
         """Init the connection.
 
         Args:

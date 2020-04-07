@@ -24,7 +24,7 @@ def get_markup(rows):
 def echo_all(message):
 	username = str(message.from_user.id)
 	first_name = message.from_user.first_name
-	conn = CSConnection(username)
+	conn = CSConnection(username, botname='harry')
 
 	bot_msg = conn.send(message.text.lower()).replace(username, first_name)
 
