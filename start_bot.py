@@ -1,13 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
+import sys
+sys.path.append('../')
+sys.path.append('../tools/enelvo')
+
 import re
+import time
+import requests
+
+from chatscript_generator import wordembedding
+import enelvo.normaliser
 from cs_connector import CSConnection
 import telebot
 from telebot import types
 
 
-EXECUTE_BOT = True
 bot = telebot.TeleBot("1022666252:AAEgV9pQGZBY2F0ddF9IEQocYVbFI3BCOtU")
+norm = enelvo.normaliser.Normaliser()
+cbow = wordembedding.CBoW()
+
+
+def title(text):
+	return text[0].upper() + text[1:]
+
 
 def get_markup(rows):
 	if not rows:
@@ -15,18 +31,37 @@ def get_markup(rows):
 
 	markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
 	for row in rows:
-		keyboard_row = [types.KeyboardButton(cel) for cel in row]
+		keyboard_row = [types.KeyboardButton(title(cel)) for cel in row]
 		markup.row(*keyboard_row)
 	return markup
 
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
-	username = str(message.from_user.id)
+	user_id = str(message.from_user.id)
 	first_name = message.from_user.first_name
-	conn = CSConnection(username, botname='harry')
 
-	bot_msg = conn.send(message.text.lower()).replace(username, first_name)
+	conn = CSConnection(user_id, botname='harry')
+
+	if message.text.startswith(':'):
+		if 'exit' in message.text:
+			bot.send_message(message.chat.id, 'EXIT')
+			bot.stop_polling()
+			exit()
+		rcvd_msg = message.text.lower()
+	else:
+		words = message.text.lower().split(' ')
+		rcvd_msg = list()
+		for word in words:
+			if word in cbow.model:
+				rcvd_msg.append(word)
+			else:
+				rcvd_msg.append(norm.normalise(word))
+		rcvd_msg = ' '.join(rcvd_msg)
+
+	bot_msg = conn.send(
+		rcvd_msg
+	).replace(first_name.lower(), first_name.title())
 
 	options_question = re.search(r'(?P<title>.*?:)(?P<options>.*)', bot_msg)
 	yes_no_question = re.search(
@@ -42,17 +77,22 @@ def echo_all(message):
 		options_dict = options_question.groupdict()
 		options = re.finditer(r'(?=( - .*? -))', options_dict['options'])
 		results = [match.group(1) for match in options]
-
-		buttons = [[opt[3:-2 ]] for opt in results]
-		bot_messages = [options_dict['title']]
+		if results:
+			buttons = [[opt[3:-2 ]] for opt in results]
+			bot_messages = options_dict['title'].split('BREAK')
+		else:
+			buttons = []
+			bot_messages = [bot_msg]
 	else:
 		buttons = []
-		bot_messages = [bot_msg]
+		bot_messages = bot_msg.split('BREAK')
 
 	markup = get_markup(buttons)
-	for bot_msg in bot_messages:
-		bot.send_message(message.chat.id, bot_msg, reply_markup=markup)
+	num_messages = len(bot_messages) - 1
+	for index, bot_msg in enumerate(bot_messages):
+		send_msg = title(bot_msg.strip())
+		send_markup = markup if index == num_messages else None
+		bot.send_message(message.chat.id, send_msg, reply_markup=send_markup)
+		time.sleep(0.3)
 
-
-while(EXECUTE_BOT):
-	bot.polling()
+bot.polling()
