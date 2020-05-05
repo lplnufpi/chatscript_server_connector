@@ -21,7 +21,8 @@ norm = enelvo.normaliser.Normaliser()
 cbow = wordembedding.CBoW()
 
 users_profiles = {
-	'815033196': '2'
+	'222098113': '1', # Vitor
+	'815033196': '2', # Patrício
 }
 
 def title(text):
@@ -46,7 +47,7 @@ def echo_all(message):
 	if user_id in users_profiles:
 		user_profile = users_profiles[user_id]
 	else:
-		print('User hasn\'t profile')
+		print('User {} hasn\'t profile'.format(user_id))
 		user_profile = '0'
 
 	conn = CSConnection(user_id, botname='harry')
