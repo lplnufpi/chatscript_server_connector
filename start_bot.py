@@ -16,7 +16,7 @@ import telebot
 from telebot import types
 
 
-bot = telebot.TeleBot("1022666252:AAEgV9pQGZBY2F0ddF9IEQocYVbFI3BCOtU")
+bot = telebot.TeleBot("1214763382:AAEgrtYBxKRHOvj8ZspVejzLN0trxdwPNeo")
 norm = enelvo.normaliser.Normaliser()
 cbow = wordembedding.CBoW()
 
