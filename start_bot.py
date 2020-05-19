@@ -22,7 +22,7 @@ cbow = wordembedding.CBoW()
 
 users_profiles = {
 	'222098113': '1', # Vitor
-	'815033196': '2', # Patrício
+	'815033196': '1', # Patrício
 }
 
 def title(text):
@@ -84,8 +84,7 @@ def echo_all(message):
 			bot_msg = 'REVIEW'.join([bot_msg] + split_review[1:])
 
 	# Replace user_id and user_profile by the user first name
-	bot_msg = bot_msg.replace(' '+user_id, first_name.title())
-	bot_msg = bot_msg.replace(' '+user_profile, first_name.title())
+	bot_msg = bot_msg.replace('USER', first_name.title())
 
 	options_question = re.search(r'(?P<title>.*?:)(?P<options>.*)', bot_msg)
 	yes_no_question = re.search(
