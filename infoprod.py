@@ -10,7 +10,7 @@ result = db.query(
 )
 
 if not result:
-    print('O produto "{}" não foi encontradooo'.format(nome))
+    print('O produto "{}" não foi encontrado'.format(nome))
 else:
     for row in result:
         text = (
