@@ -14,7 +14,13 @@ if not result:
 else:
     for row in result:
         text = (
-            'O produto "{prod}" tem data de entrega prevista '
-            'para {date} e encontra-se atualmente em {loc}.'
-        ).format(prod=row['nome'], date=row['previsao_entrega'], loc=row['localizacao'])
+            'O produto "{prod}" foi comprado em {purchased}, tem data de '
+            'entrega prevista para {delivery}, e encontra-se atualmente '
+            'em {loc}.'
+        ).format(
+            prod=row['nome'],
+            purchased=row['data_compra'],
+            delivery=row['previsao_entrega'],
+            loc=row['localizacao']
+        )
         print(text)

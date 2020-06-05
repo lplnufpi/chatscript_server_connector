@@ -52,8 +52,10 @@ def echo_all(message):
 	if user_id in users_profiles:
 		user_profile = users_profiles[user_id]
 	else:
-		print('User {} - {} hasn\'t profile'.format(first_name, user_id))
 		user_profile = '0'
+	print(
+		'User {} - Id {} - Profile {}'.format(first_name, user_id, user_profile)
+	)
 
 	conn = CSConnection(user_id, botname='harry')
 
