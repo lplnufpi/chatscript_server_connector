@@ -14,7 +14,7 @@ if not result:
 else:
     for row in result:
         text = (
-            'O produto "{prod}" foi comprado em {purchased}, tem data de '
+            'O produto *{prod}* foi comprado em {purchased}, tem data de '
             'entrega prevista para {delivery}, e encontra-se atualmente '
             'em {loc}.'
         ).format(

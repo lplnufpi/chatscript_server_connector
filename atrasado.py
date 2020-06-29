@@ -6,9 +6,11 @@ table = db['produto']
 rows = table.find(usuario=sys.argv[1])
 
 atrasados = [
-    '{prod} (comprado em {purchased} e com última localização em {loc})'.format(
+    '*{prod}* comprado em {purchased}, data de entrega prevista para {delivery}, '
+    'última localização em {loc})'.format(
         prod=row['nome'],
         purchased=row['data_compra'],
+        delivery=row['previsao_entrega'],
         loc=row['localizacao']
     )
     for row in rows if row['status'] != 'Entregue'
@@ -21,7 +23,7 @@ if atrasados:
         'em atraso: {}. Desculpe o incômodo, nossa equipe está '
         'trabalhando para que os produtos sejam entregues o mais '
         'rápido possível.'
-    ).format(', '.join(atrasados))
+    ).format('; '.join(atrasados))
 elif entregues:
     title = 'Não existem produtos com entrega em atraso no seu histórico.'
 else:

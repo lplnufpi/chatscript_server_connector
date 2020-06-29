@@ -12,6 +12,7 @@ import subprocess
 from chatscript_generator import wordembedding
 import enelvo.normaliser
 from cs_connector import CSConnection
+import telegram
 import telebot
 from telebot import types
 
@@ -20,14 +21,25 @@ bot = telebot.TeleBot("1214763382:AAEgrtYBxKRHOvj8ZspVejzLN0trxdwPNeo")
 norm = enelvo.normaliser.Normaliser()
 cbow = wordembedding.CBoW()
 
+users = list()
+
 users_profiles = {
 	'1005448831': '0', # Professor 1
 	'1016949742': '1', # Professor 2
 	'222098113': '1', # Vitor
-	'815033196': '1', # Patrício
+	'815033196': '2', # Patrício
 	'986846182': '2', # Prof Lucas
 	'1227416692': '3', # Prof Marina
 
+	'111924266': '0',  # User Roney
+	'781461851': '0',  # User Gabriel
+	'73050958': '1',   # User João Paulo
+	'737034449': '2',  # User Kauan
+	'819573423': '3',  # User Gilvan
+	'607631480': '3',  # User Leandro
+
+	'356610632': '1',  # User João
+	'1194861342': '2', # User Rafael
 }
 
 def title(text):
@@ -53,9 +65,12 @@ def echo_all(message):
 		user_profile = users_profiles[user_id]
 	else:
 		user_profile = '0'
-	print(
-		'User {} - Id {} - Profile {}'.format(first_name, user_id, user_profile)
-	)
+	user_str = 'User {} - Id {} - Profile {}'.format(first_name, user_id, user_profile)
+	if user_str not in users:
+		users.append(user_str)
+		print(user_str)
+		with open('arq.txt', 'a') as arq:
+			arq.write('\n'.join(users))
 
 	conn = CSConnection(user_id, botname='harry')
 
@@ -123,8 +138,12 @@ def echo_all(message):
 			send_msg = title(bot_msg.strip())
 			send_markup = markup if index == num_messages else None
 			bot.send_message(
-				message.chat.id, send_msg, reply_markup=send_markup
+				message.chat.id,
+				send_msg,
+				reply_markup=send_markup,
+				parse_mode=telegram.ParseMode.MARKDOWN
 			)
 			time.sleep(0.3)
 
+bot.delete_webhook()
 bot.polling()
